@@ -82,6 +82,10 @@ func main() {
 
 			log.Printf("Total: %d", result.Meta.Total)
 
+			if len(result.Data) > 0 {
+				log.Printf("Date range: %s - %s", result.Data[0].Attributes.Date, result.Data[len(result.Data)-1].Attributes.Date)
+			}
+
 			var availableDays []string
 			for _, day := range result.Data {
 				if day.Attributes.IsAvailable {
@@ -97,12 +101,7 @@ func main() {
 					log.Println("Error sending Telegram message:", err)
 				}
 			} else {
-				msgText := "No available days"
-				msg := tgbotapi.NewMessage(chatID, msgText)
-				_, err = bot.Send(msg)
-				if err != nil {
-					log.Println("Error sending Telegram message:", err)
-				}
+				log.Println("No available days found")
 			}
 		}
 	}
