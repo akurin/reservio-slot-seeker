@@ -97,7 +97,12 @@ func main() {
 					log.Println("Error sending Telegram message:", err)
 				}
 			} else {
-				log.Println("No available days found")
+				msgText := "No available days"
+				msg := tgbotapi.NewMessage(chatID, msgText)
+				_, err = bot.Send(msg)
+				if err != nil {
+					log.Println("Error sending Telegram message:", err)
+				}
 			}
 		}
 	}
