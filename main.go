@@ -96,6 +96,8 @@ func main() {
 				if err != nil {
 					log.Println("Error sending Telegram message:", err)
 				}
+			} else {
+				log.Println("No available days found")
 			}
 		}
 	}
