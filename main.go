@@ -12,6 +12,10 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+const (
+	pollInterval = 10 * time.Second
+)
+
 func main() {
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if botToken == "" {
@@ -51,8 +55,10 @@ func main() {
 		}
 	}()
 
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
+
+	var previousAvailableDays []string
 
 	for {
 		select {
@@ -93,16 +99,40 @@ func main() {
 				}
 			}
 
-			if len(availableDays) > 0 {
-				msgText := "Available days: " + strings.Join(availableDays, ", ")
+			if !slicesEqual(availableDays, previousAvailableDays) {
+				var msgText string
+				if len(availableDays) > 0 {
+					msgText = "🎯 Available days: " + strings.Join(availableDays, ", ")
+				} else {
+					msgText = "❌ No available days found"
+				}
+
 				msg := tgbotapi.NewMessage(chatID, msgText)
 				_, err = bot.Send(msg)
 				if err != nil {
 					log.Println("Error sending Telegram message:", err)
+				} else {
+					log.Printf("Sent notification: %s", msgText)
 				}
+
+				previousAvailableDays = availableDays
 			} else {
-				log.Println("No available days found")
+				log.Printf("No change in available days (count: %d)", len(availableDays))
 			}
 		}
 	}
+}
+
+func slicesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }
