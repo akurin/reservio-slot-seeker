@@ -40,10 +40,13 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- $svc := default dict .Values.service }}
+          {{- if hasKey $svc "port" }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ index $svc "port" }}
               protocol: TCP
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -60,13 +63,14 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- $env := default dict .Values.env }}
           env:
             - name: TELEGRAM_BOT_TOKEN
-              value: {{ .Values.env.TELEGRAM_BOT_TOKEN | quote }}
+              value: {{ required "env.TELEGRAM_BOT_TOKEN is required" (index $env "TELEGRAM_BOT_TOKEN") | quote }}
             - name: RESERVIO_URL
-              value: {{ .Values.env.RESERVIO_URL | quote }}
+              value: {{ required "env.RESERVIO_URL is required" (index $env "RESERVIO_URL") | quote }}
             - name: TELEGRAM_CHAT_ID
-              value: {{ .Values.env.TELEGRAM_CHAT_ID | quote }}
+              value: {{ required "env.TELEGRAM_CHAT_ID is required" (index $env "TELEGRAM_CHAT_ID") | quote }}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

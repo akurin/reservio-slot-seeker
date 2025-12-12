@@ -54,9 +54,18 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "reservio-slot-seeker.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "reservio-slot-seeker.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
+{{- $sa := default dict .Values.serviceAccount -}}
+{{- $create := false -}}
+{{- if hasKey $sa "create" -}}
+{{- $create = index $sa "create" -}}
+{{- end -}}
+{{- $name := "" -}}
+{{- if hasKey $sa "name" -}}
+{{- $name = index $sa "name" -}}
+{{- end -}}
+{{- if $create -}}
+{{- default (include "reservio-slot-seeker.fullname" .) $name }}
+{{- else -}}
+{{- default "default" $name }}
+{{- end -}}
 {{- end }}
