@@ -4,3 +4,6 @@ image:
   repository: ghcr.io/akurin/reservio-slot-seeker
   pullPolicy: Always
   tag: "latest"
+
+autoscaling:
+  enabled: false
